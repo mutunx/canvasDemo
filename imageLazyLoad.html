@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.min.js"></script>
+    <title>image lazy load </title>
+</head>
+<body>
+    
+<script>
+    let canvas;
+    init();
+
+    let imgURL = `https://img-comment-fun.9cache.com/media/aYgrrd0/aDVNxNAg_700w_0.jpg`;
+    let imgURL2 = `https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/7714675e-dfd8-4394-a0a0-ed938a7119f4/d79erhs-6c519882-7420-448e-ac99-02752ec50877.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzc3MTQ2NzVlLWRmZDgtNDM5NC1hMGEwLWVkOTM4YTcxMTlmNFwvZDc5ZXJocy02YzUxOTg4Mi03NDIwLTQ0OGUtYWM5OS0wMjc1MmVjNTA4NzcuanBnIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.spY3iTauzIbhsXq_T5nt26WMoi1CePxDApPUXOitPdU`;
+    let imgURL3 = `https://live.staticflickr.com/290/32419367425_b691ae0ae6_b.jpg`;
+    
+    let imgs = [imgURL,imgURL2,imgURL3];
+
+    let i = 1;
+
+    new fabric.Image.fromURL(imgURL,(img) => {
+        img.scaleToHeight(200);
+        img.scaleToWidth(200);
+
+        // bug: 下标与需要展示的图片不一致
+        img.on("mouseup",(evt) => {
+            i = i >= imgs.length ? 0 : i; 
+            console.log("change to ",i);
+           evt.target.setSrc(imgs[i]);
+            i++;
+            evt.target.dirty = true;
+           evt.target.scaleToHeight(200);
+           evt.target.scaleToWidth(200);
+           canvas.renderAll();
+        });
+
+        
+
+        canvas.add(img);
+    })
+
+    function init() {
+        let c = document.createElement("canvas");
+        c.setAttribute("width",500);
+        c.setAttribute("height",500);
+        c.setAttribute("id","canvas");
+        document.body.appendChild(c);
+        canvas = new fabric.Canvas("canvas");
+        c.style.border = "1px solid black";
+    }
+    
+</script>
+</body>
+</html>
