@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.min.js"></script>
+    <title>fabric demo </title>
+</head>
+<body>
+    
+<script>
+   let canvas = init();
+    
+
+
+
+    function init() {
+        let id = "canvas"+new Date().getTime();
+        let c = document.createElement("canvas");
+        c.setAttribute("width",200);
+        c.setAttribute("height",200);
+        c.setAttribute("id",id);
+        c.style.border = "1px solid black";
+        document.body.appendChild(c);
+        return new fabric.Canvas(id);
+    }
+
+</script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.min.js"></script>
+    <title>fabric demo </title>
+</head>
+<body>
+    
+<script>
+    let canvas = init();
+    let canvas2 = init();
+    canvas.on("selection:created",(evt)=>{
+        console.log("canvas1.selection")
+        let obj = canvas2.getObjects().find(x=>x.id === evt.target.id);
+        if (canvas2.getActiveObject()?.id === obj.id) {
+            return
+        }
+        canvas2.setActiveObject(obj);
+        canvas2.renderAll();
+    })
+    canvas2.on("selection:created",(evt)=>{
+        console.log("canvas2.selection")
+        let obj = canvas.getObjects().find(x=>x.id === evt.target.id);
+        if (canvas.getActiveObject()?.id === obj.id) {
+            return
+        }
+        canvas.setActiveObject(obj);
+        canvas2.renderAll();
+    })
+    canvas.on("selection:updated",(evt)=>{
+        console.log("canvas1.selection")
+        let obj = canvas2.getObjects().find(x=>x.id === evt.target.id);
+        if (canvas2.getActiveObject()?.id === obj.id) {
+            return
+        }
+        canvas2.setActiveObject(obj);
+        canvas2.renderAll();
+    })
+    canvas2.on("selection:updated",(evt)=>{
+        console.log("canvas2.selection")
+        let obj = canvas.getObjects().find(x=>x.id === evt.target.id);
+        if (canvas.getActiveObject()?.id === obj.id) {
+            return
+        }
+        canvas.setActiveObject(obj);
+        canvas.renderAll();
+    })
+
+    canvas.on("selection:cleared",(evt)=>{
+        canvas2.discardActiveObject();
+        canvas2.renderAll();
+    })
+    canvas2.on("selection:cleared",(evt)=>{
+        canvas.discardActiveObject();
+        canvas.renderAll();
+    })
+
+    canvas.on("object:moving",(evt)=>{
+        console.log("canvas1")
+        let obj = canvas2.getObjects().find(x=>x.id === evt.target.id);
+        obj.set({           
+            left: evt.target.left,
+            top: evt.target.top,
+        })
+        canvas2.dirty = true;
+        canvas2.renderAll();
+    })
+    canvas2.on("object:moving",(evt)=>{
+        console.log("canvas2")
+        let obj = canvas.getObjects().find(x=>x.id === evt.target.id);
+        obj.set({
+            left: evt.target.left,
+            top: evt.target.top,
+        })
+        obj.dirty = true;
+        canvas.renderAll();
+    })
+
+    canvas.on("object:scaling",(evt)=>{
+        console.log("canvas1")
+        let obj = canvas2.getObjects().find(x=>x.id === evt.target.id);
+        obj.set({ 
+            left: evt.target.left,
+            top: evt.target.top,          
+            scaleX: evt.target.scaleX,
+            scaleY: evt.target.scaleY,
+        })
+        canvas2.dirty = true;
+        canvas2.renderAll();
+    })
+    canvas2.on("object:scaling",(evt)=>{
+        console.log("canvas2")
+        let obj = canvas.getObjects().find(x=>x.id === evt.target.id);
+        obj.set({
+            left: evt.target.left,
+            top: evt.target.top,
+            scaleX: evt.target.scaleX,
+            scaleY: evt.target.scaleY,
+        })
+        obj.dirty = true;
+        canvas.renderAll();
+    })
+
+    canvas.on("object:rotating",(evt)=>{
+        let obj = canvas2.getObjects().find(x=>x.id === evt.target.id);
+        obj.set({           
+            left: evt.target.left,
+            top: evt.target.top,
+            angle: evt.target.angle,
+        })
+        canvas2.dirty = true;
+        canvas2.renderAll();
+    })
+    canvas2.on("object:rotating",(evt)=>{
+        let obj = canvas.getObjects().find(x=>x.id === evt.target.id);
+        obj.set({
+            left: evt.target.left,
+            top: evt.target.top,
+            angle: evt.target.angle,
+        })
+        obj.dirty = true;
+        canvas.renderAll();
+    })
+
+    let rect = new fabric.Rect({
+        id:1,
+        width: 50,
+        height: 50,
+        fill: "gray"
+    })
+    let rect2 = new fabric.Rect({
+        id:1,
+        width: 50,
+        height: 50,
+        fill: "black"
+    })
+
+    let rectr = new fabric.Rect({
+        id:2,
+        width: 50,
+        height: 50,
+        fill: "red"
+    })
+    let rectr2 = new fabric.Rect({
+        id:2,
+        width: 50,
+        height: 50,
+        fill: "red"
+    })
+
+
+    canvas.add(rect);
+    canvas2.add(rect2);
+    canvas.add(rectr);
+    canvas2.add(rectr2);
+
+
+
+    function init() {
+        let id = "canvas"+new Date().getTime();
+        let c = document.createElement("canvas");
+        c.setAttribute("width",200);
+        c.setAttribute("height",200);
+        c.setAttribute("id",id);
+        c.style.border = "1px solid black";
+        document.body.appendChild(c);
+        return new fabric.Canvas(id);
+    }
+
+</script>
+</body>
+</html>
