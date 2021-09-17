@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.min.js"></script>
+    <title>fabric demo </title>
+</head>
+<body>
+    
+<script>
+    let canvas = init();
+    const imgURL = `https://i.kym-cdn.com/entries/icons/original/000/005/574/takemymoney.jpg`;
+    var line = new fabric.Line([100, 0, 100, 400], {
+            stroke: 'red'
+    })
+
+    var img = new fabric.Image.fromURL(imgURL, img => {
+        img.set({
+            left: 80,
+        })
+        img.scaleToHeight(200);
+        img.scaleToWidth(200);
+        img.on("mousemove", (evt) => {
+            let obj = evt.target;
+            let tl = evt.target.aCoords?.tl
+            let left = -(obj.width / 2);
+            if (evt.target.aCoords?.tl.x >= 100) {
+                return;
+            } 
+            
+            evt.target.clipPath = new fabric.Rect({
+                width: obj.width,
+                height: obj.height,
+                left: left + (100 - tl.x)/obj.scaleX,
+                top: -(obj.height / 2),
+            });
+            obj.dirty = true
+            canvas.renderAll();
+        })
+        canvas.add(img)
+    })
+
+    canvas.add(line);
+
+    function init() {
+        let id = "canvas"+new Date().getTime();
+        let c = document.createElement("canvas");
+        c.setAttribute("width",400);
+        c.setAttribute("height",400);
+        c.setAttribute("id",id);
+        c.style.border = "1px solid black";
+        document.body.appendChild(c);
+        return new fabric.Canvas(id);
+    }
+
+</script>
+</body>
+</html>

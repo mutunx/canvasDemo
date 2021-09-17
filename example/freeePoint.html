@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.min.js"></script>
+    <script crossorigin="anonymous" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" src="https://lib.baomitu.com/jquery/3.6.0/jquery.js"></script>
+    <title>fabric demo </title>
+</head>
+<body>
+    <div style="position: relative;width: 410px;height: 410px;" >
+        <canvas id="br" width="400" height="400" 
+          style="position: absolute; 
+          left: 0; top: 0;
+           z-index: 0;border: 1px solid royalblue;"></canvas>
+        <canvas id="tr" width="400" height="100" 
+          style="position: absolute; 
+          left: 0; top: 0; 
+          z-index: 1;border: 1px solid coral;"></canvas>
+       <canvas id="bl" width="100" height="400" 
+          style="position: absolute; 
+          left: 0; top: 0; 
+          z-index: 1;border: 1px solid blueviolet;"></canvas>
+       <canvas id="tl" width="100" height="100" 
+          style="position: absolute; 
+          left: 0; top: 0; 
+          z-index: 1;border: 1px solid aquamarine;"></canvas>
+    </div>
+       <button id="toLeft">toLeft</button>
+       <button id="toDown">toDown</button>
+<script>
+    var br = new fabric.Canvas('br');
+    var bl = new fabric.Canvas('bl');
+    var tr = new fabric.Canvas('tr');
+    var tl = new fabric.Canvas('tl');
+
+    let btnTD = document.getElementById("toDown");
+    let btnTL = document.getElementById("toLeft");
+    document.getElementsByClassName("canvas-container")[0].setAttribute("style","position:absolute")
+    document.getElementsByClassName("canvas-container")[1].setAttribute("style","position:absolute")
+    document.getElementsByClassName("canvas-container")[2].setAttribute("style","position:absolute")
+    document.getElementsByClassName("canvas-container")[3].setAttribute("style","position:absolute")
+
+    btnTL.addEventListener("click",() => {
+        console.log("to left");
+        tr.getObjects().forEach(x=> x.set("left",x.left-10));
+        br.getObjects().forEach(x=> x.set("left",x.left-10));
+        tr.renderAll();
+        br.renderAll();
+    });
+
+    btnTD.addEventListener("click",() => {
+        console.log("to down");
+        br.getObjects().forEach(x=> x.set("top",x.top-10));
+        bl.getObjects().forEach(x=> x.set("top",x.top-10));
+        br.renderAll();
+        bl.renderAll();
+    });
+
+    let rect = new fabric.Rect({
+        id:1,
+        width:150,
+        height:150,
+        left: 30,
+        top: 30,
+        fill:"aquamarine",
+    })
+
+    let rect2 = new fabric.Rect({
+        id:1,
+        width:150,
+        height:150,
+        left: 30,
+        top: 30,
+        fill:"blueviolet",
+    })
+    let rect3 = new fabric.Rect({
+        id:1,
+        width:150,
+        height:150,
+        left: 30,
+        top: 30,
+        fill:"coral",
+    })
+    let rect4 = new fabric.Rect({
+        id:1,
+        width:150,
+        height:150,
+        left: 30,
+        top: 30,
+        fill:"royalblue",
+    })
+
+    let recta = new fabric.Rect({
+        id:2,
+        width:150,
+        height:150,
+        left: 200,
+        top: 200,
+        fill:"aquamarine",
+    })
+
+    let rect2a = new fabric.Rect({
+        id:2,
+        width:150,
+        height:150,
+        left: 200,
+        top: 200,
+        fill:"blueviolet",
+    })
+    let rect3a = new fabric.Rect({
+        id:2,
+        width:150,
+        height:150,
+        left: 200,
+        top: 200,
+        fill:"coral",
+    })
+    let rect4a = new fabric.Rect({
+        id:2,
+        width:150,
+        height:150,
+        left: 200,
+        top: 200,
+        fill:"royalblue",
+    })
+    
+    br.add(rect4);
+    bl.add(rect2);
+    tr.add(rect3);
+    tl.add(rect);
+    br.add(rect4a);
+    bl.add(rect2a);
+    tr.add(rect3a);
+    tl.add(recta);
+    
+
+
+    let events = {
+        "object:rotating": (canvas) => {
+            return (evt)=>{
+                let obj = canvas.getObjects().find(x=>x.id === evt.target.id);
+                obj.set({
+                    left: evt.target.left,
+                    top: evt.target.top,
+                    angle: evt.target.angle,
+                })
+                canvas.renderAll();
+            }
+        },
+        "object:moving": (canvas) => {
+            return (evt)=>{
+                let obj = canvas.getObjects().find(x=>x.id === evt.target.id);
+                obj.set({           
+                    left: evt.target.left,
+                    top: evt.target.top,
+                })
+                canvas.renderAll();
+            }
+        },
+        "object:scaling": (canvas) => {
+            return (evt)=>{
+                let obj = canvas.getObjects().find(x=>x.id === evt.target.id);
+                obj.set({
+                    left: evt.target.left,
+                    top: evt.target.top,
+                    scaleX: evt.target.scaleX,
+                    scaleY: evt.target.scaleY,
+                })
+                canvas.renderAll();
+            }
+        },
+        "selection:created" : (canvas) => {
+            return (evt)=>{
+                console.log("canvas")
+                let obj = canvas.getObjects().find(x=>x.id === evt.target.id);
+                canvas.setActiveObject(obj);
+                canvas.renderAll();
+            }
+        },
+        "selection:cleared": (canvas) => {
+            return (evt)=>{
+                canvas.discardActiveObject();
+                canvas.renderAll();
+            }
+        },
+        "selection:updated": (canvas) => {
+            return (evt)=>{
+                let obj = canvas.getObjects().find(x=>x.id === evt.target.id);
+                if (canvas.getActiveObject()?.id === obj.id) {
+                    return
+                }
+                canvas.setActiveObject(obj);
+                canvas.renderAll();
+            }
+        },
+        //  测试用 在对象上滚动向各个方法移动 模拟滚动条
+        "mouse:wheel": (canvas) => {
+            return (evt)=>{
+                console.log("deltaX:",evt.e.deltaX/10,"deltaY:",evt.e.deltaY/10)
+                tr.getObjects().forEach(x=> x.set("left",x.left + evt.e.deltaX/10));
+                br.getObjects().forEach(x=> x.set("left",x.left + evt.e.deltaX/10));
+                bl.getObjects().forEach(x=> x.set("top",x.top + evt.e.deltaY/10));
+                br.getObjects().forEach(x=> x.set("top",x.top + evt.e.deltaY/10));
+                
+                tr.getObjects().forEach(x=> {
+                    // console.log(x.aCoords?.tl)
+                    console.log(x.left,"->left top->",x.top)
+                    if (x.left >= 100) {
+                        console.log("return")
+                        return;
+                    } 
+                    x.clipPath = new fabric.Rect({
+                        width: x.width,
+                        height: x.height,
+                        left: -(x.width / 2) + (100 -x.left) ,
+                        top: -(x.height / 2) ,
+                    });
+                    x.dirty = true;
+                });
+                br.getObjects().forEach(x=> {
+                    // console.log(x.aCoords?.tl)
+                    console.log(x.left,"->left top->",x.top)
+                    if ((evt.wheelDeltaX !=0 && x.left >= 100) || (evt.wheelDeltaX !=0 && x.top) >= 100) {
+                        console.log("return")
+                        return;
+                    } 
+                    x.clipPath = new fabric.Rect({
+                        width: x.width,
+                        height: x.height,
+                        left: -(x.width / 2) + (100 -x.left) ,
+                        top: -(x.height / 2) + (100 - x.top),
+                    });
+                    x.dirty = true;
+                });
+                
+                bl.getObjects().forEach(x=> {
+                    // console.log(x.aCoords?.tl)
+                    console.log(x.left,"->left top->",x.top)
+                    if ( x.top >= 100) {
+                        console.log("return")
+                        return;
+                    } 
+                    x.clipPath = new fabric.Rect({
+                        width: x.width,
+                        height: x.height,
+                        left: -(x.width / 2),
+                        top: -(x.height / 2) + (100 - x.top),
+                    });
+                    x.dirty = true;
+                });
+                // let bro = br.getObjects().find(x=>x.id === evt.target.id);
+
+                // if (!!!tro.aCoords || tro.aCoords?.tl.x >= 100) {
+                //     return;
+                // } 
+                // tro.clipPath = new fabric.Rect({
+                //     width: tro.width,
+                //     height: tro.height,
+                //     left: -(tro.width / 2) + (100 -tro.left) ,
+                //     top: -(tro.height / 2),
+                // });
+                // bro.clipPath = new fabric.Rect({
+                //     width: bro.width,
+                //     height: bro.height,
+                //     left: -(bro.width / 2) + (100 -tro.left),
+                //     top: -(bro.height / 2),
+                // });
+                // tro.dirty = true
+                // bro.dirty = true
+                tr.renderAll();
+                br.renderAll();
+                tl.renderAll();
+                bl.renderAll();
+            }
+        },
+    }
+
+
+    function addEvents(canvas,toCanvas) {
+        for (key of Object.keys(events)) {
+            for (toC of toCanvas) {
+                canvas.on(key,events[key](toC));
+            }
+        }
+    }
+
+
+
+    addEvents(tr,[tl,br,bl]);
+    addEvents(tl,[tr,br,bl]);
+    addEvents(br,[tl,tr,bl]);
+    addEvents(bl,[tl,br,tr]);
+</script>
+</body>
+</html>
