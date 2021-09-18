@@ -27,38 +27,23 @@
           left: 0; top: 0; 
           z-index: 1;border: 1px solid aquamarine;"></canvas>
     </div>
-       <button id="toLeft">toLeft</button>
-       <button id="toDown">toDown</button>
 <script>
     var br = new fabric.Canvas('br');
     var bl = new fabric.Canvas('bl');
     var tr = new fabric.Canvas('tr');
     var tl = new fabric.Canvas('tl');
-
     let btnTD = document.getElementById("toDown");
     let btnTL = document.getElementById("toLeft");
     document.getElementsByClassName("canvas-container")[0].setAttribute("style","position:absolute")
     document.getElementsByClassName("canvas-container")[1].setAttribute("style","position:absolute")
     document.getElementsByClassName("canvas-container")[2].setAttribute("style","position:absolute")
     document.getElementsByClassName("canvas-container")[3].setAttribute("style","position:absolute")
+    const imgURL = `https://i.kym-cdn.com/entries/icons/original/000/005/574/takemymoney.jpg`;
 
-    btnTL.addEventListener("click",() => {
-        console.log("to left");
-        tr.getObjects().forEach(x=> x.set("left",x.left-10));
-        br.getObjects().forEach(x=> x.set("left",x.left-10));
-        tr.renderAll();
-        br.renderAll();
-    });
-
-    btnTD.addEventListener("click",() => {
-        console.log("to down");
-        br.getObjects().forEach(x=> x.set("top",x.top-10));
-        bl.getObjects().forEach(x=> x.set("top",x.top-10));
-        br.renderAll();
-        bl.renderAll();
-    });
 
     let rect = new fabric.Rect({
+		deltaX:0,
+		deltaY:0,
         id:1,
         width:150,
         height:150,
@@ -68,6 +53,8 @@
     })
 
     let rect2 = new fabric.Rect({
+		deltaX:0,
+		deltaY:0,
         id:1,
         width:150,
         height:150,
@@ -76,6 +63,8 @@
         fill:"blueviolet",
     })
     let rect3 = new fabric.Rect({
+		deltaX:0,
+		deltaY:0,
         id:1,
         width:150,
         height:150,
@@ -84,6 +73,8 @@
         fill:"coral",
     })
     let rect4 = new fabric.Rect({
+		deltaX:0,
+		deltaY:0,
         id:1,
         width:150,
         height:150,
@@ -93,6 +84,8 @@
     })
 
     let recta = new fabric.Rect({
+		deltaX:0,
+		deltaY:0,
         id:2,
         width:150,
         height:150,
@@ -102,6 +95,8 @@
     })
 
     let rect2a = new fabric.Rect({
+		deltaX:0,
+		deltaY:0,
         id:2,
         width:150,
         height:150,
@@ -110,6 +105,8 @@
         fill:"blueviolet",
     })
     let rect3a = new fabric.Rect({
+		deltaX:0,
+		deltaY:0,
         id:2,
         width:150,
         height:150,
@@ -118,6 +115,8 @@
         fill:"coral",
     })
     let rect4a = new fabric.Rect({
+		deltaX:0,
+		deltaY:0,
         id:2,
         width:150,
         height:150,
@@ -125,7 +124,50 @@
         top: 200,
         fill:"royalblue",
     })
-    
+    new fabric.Image.fromURL(imgURL, img => {
+        img.set({
+            deltaX:0,
+		    deltaY:0,
+            left:0,
+            top:0,
+        })
+        img.scaleToHeight(200);
+        img.scaleToWidth(200);
+        br.add(img)
+    });
+    new fabric.Image.fromURL(imgURL, img => {
+        img.set({
+            deltaX:0,
+		    deltaY:0,
+            left:0,
+            top:0,
+        })
+        img.scaleToHeight(200);
+        img.scaleToWidth(200);
+        bl.add(img)
+    });
+    new fabric.Image.fromURL(imgURL, img => {
+        img.set({
+            deltaX:0,
+		    deltaY:0,
+            left:0,
+            top:0,
+        })
+        img.scaleToHeight(200);
+        img.scaleToWidth(200);
+        tr.add(img)
+    });
+    new fabric.Image.fromURL(imgURL, img => {
+        img.set({
+            deltaX:0,
+		    deltaY:0,
+            left:0,
+            top:0,
+        })
+        img.scaleToHeight(200);
+        img.scaleToWidth(200);
+        tl.add(img)
+    });
     br.add(rect4);
     bl.add(rect2);
     tr.add(rect3);
@@ -140,6 +182,7 @@
     let events = {
         "object:rotating": (canvas) => {
             return (evt)=>{
+                console.log("object:rotating")
                 let obj = canvas.getObjects().find(x=>x.id === evt.target.id);
                 obj.set({
                     left: evt.target.left,
@@ -151,6 +194,7 @@
         },
         "object:moving": (canvas) => {
             return (evt)=>{
+                console.log("object:scaling")
                 let obj = canvas.getObjects().find(x=>x.id === evt.target.id);
                 obj.set({           
                     left: evt.target.left,
@@ -161,6 +205,7 @@
         },
         "object:scaling": (canvas) => {
             return (evt)=>{
+                console.log("object:scaling")
                 let obj = canvas.getObjects().find(x=>x.id === evt.target.id);
                 obj.set({
                     left: evt.target.left,
@@ -173,20 +218,22 @@
         },
         "selection:created" : (canvas) => {
             return (evt)=>{
-                console.log("canvas")
+                console.log("selection:created")
+                reset(evt);
                 let obj = canvas.getObjects().find(x=>x.id === evt.target.id);
                 canvas.setActiveObject(obj);
-                canvas.renderAll();
             }
         },
         "selection:cleared": (canvas) => {
             return (evt)=>{
+                console.log("selection:cleared")
                 canvas.discardActiveObject();
                 canvas.renderAll();
             }
         },
         "selection:updated": (canvas) => {
             return (evt)=>{
+                console.log("selection:updated")
                 let obj = canvas.getObjects().find(x=>x.id === evt.target.id);
                 if (canvas.getActiveObject()?.id === obj.id) {
                     return
@@ -196,58 +243,81 @@
             }
         },
         //  测试用 在对象上滚动向各个方法移动 模拟滚动条
+        // 滚动条只有 向右和向下移动  移动后才能向反方向移动
         "mouse:wheel": (canvas) => {
             return (evt)=>{
-                console.log("deltaX:",evt.e.deltaX/10,"deltaY:",evt.e.deltaY/10)
-                tr.getObjects().forEach(x=> x.set("left",x.left + evt.e.deltaX/10));
-                br.getObjects().forEach(x=> x.set("left",x.left + evt.e.deltaX/10));
-                bl.getObjects().forEach(x=> x.set("top",x.top + evt.e.deltaY/10));
-                br.getObjects().forEach(x=> x.set("top",x.top + evt.e.deltaY/10));
+                console.log("wheel")
+                tl.discardActiveObject();
+                tr.discardActiveObject();
+                br.discardActiveObject();
+                bl.discardActiveObject();
+                let deltaX = evt.e.deltaX/10;
+                let deltaY = evt.e.deltaY/10;
+                tr.getObjects().forEach(x=> x.set({
+                    left:x.left + deltaX,
+                    deltaX:x.deltaX + deltaX?? 0,
+                }));
+                br.getObjects().forEach(x=> x.set({
+                    left:x.left + deltaX,
+                    deltaX:x.deltaX + deltaX?? 0,
+                    top:x.top + deltaY,
+                    deltaY:x.deltaY + deltaY?? 0,
+                }));
+                bl.getObjects().forEach(x=> x.set({
+                    top:x.top + deltaY,
+                    deltaY:x.deltaY + deltaY?? 0,
+                }));
                 
                 tr.getObjects().forEach(x=> {
+                    console.log(x.left,"->left tr top->",x.top)
                     // console.log(x.aCoords?.tl)
-                    console.log(x.left,"->left top->",x.top)
-                    if (x.left >= 100) {
-                        console.log("return")
-                        return;
-                    } 
+
+                    let left =  100 - x.left;
+                    left = left < 0 ? 0 : left;
+
                     x.clipPath = new fabric.Rect({
                         width: x.width,
                         height: x.height,
-                        left: -(x.width / 2) + (100 -x.left) ,
+                        left: -(x.width / 2) + left/x.scaleX ,
                         top: -(x.height / 2) ,
                     });
                     x.dirty = true;
+                    x.setCoords();
                 });
                 br.getObjects().forEach(x=> {
+                    console.log(x.left,"->left br top->",x.top);
                     // console.log(x.aCoords?.tl)
-                    console.log(x.left,"->left top->",x.top)
-                    if ((evt.wheelDeltaX !=0 && x.left >= 100) || (evt.wheelDeltaX !=0 && x.top) >= 100) {
-                        console.log("return")
-                        return;
-                    } 
+                    
+                    let left =  100 - x.left;
+                    left = left < 0 ? 0 : left;
+
+                    let top = 100 - x.top;
+                    top = top < 0 ? 0 : top;
+
                     x.clipPath = new fabric.Rect({
                         width: x.width,
                         height: x.height,
-                        left: -(x.width / 2) + (100 -x.left) ,
-                        top: -(x.height / 2) + (100 - x.top),
+                        left: -(x.width / 2) + left/x.scaleX ,
+                        top: -(x.height / 2) + top /x.scaleY,
                     });
+                    x.setCoords();
                     x.dirty = true;
                 });
                 
                 bl.getObjects().forEach(x=> {
+                    console.log(x.left,"->left bl top->",x.top)
                     // console.log(x.aCoords?.tl)
-                    console.log(x.left,"->left top->",x.top)
-                    if ( x.top >= 100) {
-                        console.log("return")
-                        return;
-                    } 
+
+                    let top = 100 - x.top;
+                    top = top < 0 ? 0 : top;
+
                     x.clipPath = new fabric.Rect({
                         width: x.width,
                         height: x.height,
                         left: -(x.width / 2),
-                        top: -(x.height / 2) + (100 - x.top),
+                        top: -(x.height / 2) + top/x.scaleY ,
                     });
+                    x.setCoords();
                     x.dirty = true;
                 });
                 // let bro = br.getObjects().find(x=>x.id === evt.target.id);
@@ -269,9 +339,10 @@
                 // });
                 // tro.dirty = true
                 // bro.dirty = true
+                
+                tl.renderAll();
                 tr.renderAll();
                 br.renderAll();
-                tl.renderAll();
                 bl.renderAll();
             }
         },
@@ -286,8 +357,52 @@
         }
     }
 
+    function reset(evt) {
+        tr.getObjects().forEach(x=>{
+            console.log(x.deltaX,"<-deltaX tr deltaY->",x.deltaY,x.top,"<- top left->",x.left)
+            x.set({
+                left: x.left - x.deltaX?? 0, 
+                top: x.top - x.deltaY?? 0,
+                deltaX: 0,
+                deltaY: 0,
+            });
+            // 图像复位后需要逐个重新定位
+            x.setCoords();
+            x.clipPath = null;
+            x.dirty = true;
+        });
+        br.getObjects().forEach(x=>{
+            console.log(x.deltaX,"<-deltaX br deltaY->",x.deltaY,x.top,"<- top left->",x.left)
+            x.set({
+                left: x.left - x.deltaX?? 0, 
+                top: x.top - x.deltaY?? 0,
+                deltaX: 0,
+                deltaY: 0,
+            });
+            x.setCoords();
+            x.clipPath = null;
+            x.dirty = true;
+        });
+        bl.getObjects().forEach(x=>{
+            console.log(x.deltaX,"<-deltaX bl deltaY->",x.deltaY,x.top,"<- top left->",x.left)
+            x.set({
+                left: x.left - x.deltaX?? 0, 
+                top: x.top - x.deltaY?? 0,
+                deltaX: 0,
+                deltaY: 0,
+            });
+            x.setCoords();
+            x.clipPath = null;
+            x.dirty = true;
+        });
+        tr.renderAll();
+        br.renderAll();
+        bl.renderAll();
+
+    }
 
 
+    
     addEvents(tr,[tl,br,bl]);
     addEvents(tl,[tr,br,bl]);
     addEvents(br,[tl,tr,bl]);
