@@ -27,19 +27,21 @@
           left: 0; top: 0; 
           z-index: 1;border: 1px solid aquamarine;"></canvas>
     </div>
+    <button id="btn">freeze</button>
+    
 <script>
     var br = new fabric.Canvas('br');
     var bl = new fabric.Canvas('bl');
     var tr = new fabric.Canvas('tr');
     var tl = new fabric.Canvas('tl');
-    let btnTD = document.getElementById("toDown");
-    let btnTL = document.getElementById("toLeft");
     document.getElementsByClassName("canvas-container")[0].setAttribute("style","position:absolute")
     document.getElementsByClassName("canvas-container")[1].setAttribute("style","position:absolute")
     document.getElementsByClassName("canvas-container")[2].setAttribute("style","position:absolute")
     document.getElementsByClassName("canvas-container")[3].setAttribute("style","position:absolute")
     const imgURL = `https://i.kym-cdn.com/entries/icons/original/000/005/574/takemymoney.jpg`;
-
+    let freeze = true;
+    let btn = document.getElementById("btn");
+    
 
     let rect = new fabric.Rect({
 		deltaX:0,
@@ -246,6 +248,7 @@
         // 滚动条只有 向右和向下移动  移动后才能向反方向移动
         "mouse:wheel": (canvas) => {
             return (evt)=>{
+
                 console.log("wheel")
                 tl.discardActiveObject();
                 tr.discardActiveObject();
@@ -348,16 +351,51 @@
         },
     }
 
-
+    btn.addEventListener("click",() => {
+        if (freeze) {
+            console.log("Defrosting")
+            reset();
+            for (key of Object.keys(events)) {
+                br.off(key)
+            }
+            
+            tr.dispose();
+            tl.dispose();
+            bl.dispose();
+            document.getElementById("tr").remove();
+            document.getElementById("tl").remove();
+            document.getElementById("bl").remove();
+            freeze = false;
+        } else {
+            console.log("Frosting")
+         
+        }
+    });
     function addEvents(canvas,toCanvas) {
+        if (!!! canvas) return;
         for (key of Object.keys(events)) {
             for (toC of toCanvas) {
+                if (!!! toC) return;
                 canvas.on(key,events[key](toC));
             }
         }
     }
 
     function reset(evt) {
+        br.getObjects().forEach(x=>{
+            console.log(x.deltaX,"<-deltaX br deltaY->",x.deltaY,x.top,"<- top left->",x.left)
+            x.set({
+                left: x.left - x.deltaX?? 0, 
+                top: x.top - x.deltaY?? 0,
+                deltaX: 0,
+                deltaY: 0,
+            });
+            x.setCoords();
+            x.clipPath = null;
+            x.dirty = true;
+        });
+        br.renderAll();
+        if (!freeze) return;
         tr.getObjects().forEach(x=>{
             console.log(x.deltaX,"<-deltaX tr deltaY->",x.deltaY,x.top,"<- top left->",x.left)
             x.set({
@@ -371,18 +409,7 @@
             x.clipPath = null;
             x.dirty = true;
         });
-        br.getObjects().forEach(x=>{
-            console.log(x.deltaX,"<-deltaX br deltaY->",x.deltaY,x.top,"<- top left->",x.left)
-            x.set({
-                left: x.left - x.deltaX?? 0, 
-                top: x.top - x.deltaY?? 0,
-                deltaX: 0,
-                deltaY: 0,
-            });
-            x.setCoords();
-            x.clipPath = null;
-            x.dirty = true;
-        });
+        
         bl.getObjects().forEach(x=>{
             console.log(x.deltaX,"<-deltaX bl deltaY->",x.deltaY,x.top,"<- top left->",x.left)
             x.set({
@@ -396,7 +423,7 @@
             x.dirty = true;
         });
         tr.renderAll();
-        br.renderAll();
+        
         bl.renderAll();
 
     }
