@@ -16,6 +16,8 @@
            z-index: 0;border: 1px solid royalblue;"></canvas>
     </div>
     <button id="btn">freeze</button>
+    <br/>
+    <div id="out"></div>
     
 <script>
     var br = new fabric.Canvas('br');
@@ -26,7 +28,7 @@
     const imgURL = `https://th.bing.com/th/id/OIP.28EBZUBR_BR6yOf7Gen8twAAAA?pid=ImgDet&rs=1`;
     let freeze;
     let btn = document.getElementById("btn");
-    
+    let out = document.getElementById("out");
 
 
     let rect4 = new fabric.Rect({
@@ -61,19 +63,20 @@
       
         br.add(img)
     });
-   
     br.add(rect4);
     br.add(rect4a);
     
 
-
+    function find(canvas,id) {
+        return canvas.getObjects().find(x=>x.id === evt.target.id);
+    }
 
     let events = {
-        "object:rotating": (canvas) => {
+        "object:rotating": (canvas,id) => {
             return (evt)=>{
                 console.log("object:rotating")
-                let obj = canvas.getObjects().find(x=>x.id === evt.target.id);
-                obj.set({
+                // let obj = canvas.getObjects().find(x=>x.id === evt.target.id);
+                find(canvas,evt.target.id).set({
                     left: evt.target.left,
                     top: evt.target.top,
                     angle: evt.target.angle,
@@ -81,18 +84,66 @@
                 canvas.renderAll();
             }
         },
-        "object:moving": (canvas) => {
+        
+        "object:moving": (canvas,id) => {
             return (evt)=>{
-                console.log("object:scaling")
+                
+                console.log("object:moving")
                 let obj = canvas.getObjects().find(x=>x.id === evt.target.id);
+                let offsetX = 0;
+                let offsetY = 0;
+                switch(id) {
+                    case "tr":
+                        offsetY = evt.target.deltaY;
+                        break;
+                    case "bl": 
+                        offsetX = evt.target.deltaX;
+                        break;
+                    case "tl": 
+                        offsetX = evt.target.deltaX;
+                        offsetY = evt.target.deltaY;
+                        break;
+                    
+                } 
+                
                 obj.set({           
-                    left: evt.target.left,
-                    top: evt.target.top,
+                    left: evt.target.left - offsetX,  
+                    top: evt.target.top - offsetY, 
                 })
+                if (!!freeze) {
+                    if (id === "tl") {
+                        canvas.renderAll();
+                        return
+                    }
+                    let left =  100 - evt.target.left;
+                    left = left < 0 ? 0 : left;
+                    // obj.set("fill","red")
+                    let top = 100 - evt.target.top;
+                    top = top < 0 ? 0 : top;
+                    switch(id) {
+                        case "tr":
+                            top = 0;
+                        case "bl": 
+                            left = 0;
+                    }
+                    
+                    out.textContent = "left=" + left + " top=" + top
+                    obj.clipPath =  new fabric.Rect({
+                        width: obj.width,
+                        height: obj.height,
+                        left: -(obj.width / 2) + left/evt.target.scaleX ,
+                        top: -(obj.height / 2) + top /evt.target.scaleY,
+                    });
+                    out.textContent +="\n clipPath left" + -(obj.width / 2) + left/evt.target.scaleX;
+                    out.textContent +=" clipPath top" + -(obj.height / 2) + top/evt.target.scaleY;
+                    obj.dirty = true;
+                    obj.moveTo(a++)
+                }
                 canvas.renderAll();
+                br.renderAll();
             }
         },
-        "object:scaling": (canvas) => {
+        "object:scaling": (canvas,id) => {
             return (evt)=>{
                 console.log("object:scaling")
                 let obj = canvas.getObjects().find(x=>x.id === evt.target.id);
@@ -105,22 +156,24 @@
                 canvas.renderAll();
             }
         },
-        "selection:created" : (canvas) => {
+        "selection:created" : (canvas,id) => {
+            console.log("event selection:created")
             return (evt)=>{
                 console.log("selection:created")
+                if (!!!evt.e) return;
                 if (evt.e.x < 100 || evt.e.y < 100) reset(evt);
                 let obj = canvas.getObjects().find(x=>x.id === evt.target.id);
                 canvas.setActiveObject(obj);
             }
         },
-        "selection:cleared": (canvas) => {
+        "selection:cleared": (canvas,id) => {
             return (evt)=>{
                 console.log("selection:cleared")
                 canvas.discardActiveObject();
                 canvas.renderAll();
             }
         },
-        "selection:updated": (canvas) => {
+        "selection:updated": (canvas,id) => {
             return (evt)=>{
                 console.log("selection:updated")
                 let obj = canvas.getObjects().find(x=>x.id === evt.target.id);
@@ -133,7 +186,7 @@
         },
         //  测试用 在对象上滚动向各个方法移动 模拟滚动条
         // 滚动条只有 向右和向下移动  移动后才能向反方向移动
-        "mouse:wheel": (canvas) => {
+        "mouse:wheel": (canvas,id) => {
             return (evt)=>{
 
                 let tr = freeze.tr;
@@ -146,20 +199,27 @@
                 bl.discardActiveObject();
                 let deltaX = evt.e.deltaX/10;
                 let deltaY = evt.e.deltaY/10;
-                tr.getObjects().forEach(x=> x.set({
-                    left:x.left + deltaX,
-                    deltaX:x.deltaX + deltaX?? 0,
-                }));
                 br.getObjects().forEach(x=> x.set({
                     left:x.left + deltaX,
                     deltaX:x.deltaX + deltaX?? 0,
                     top:x.top + deltaY,
                     deltaY:x.deltaY + deltaY?? 0,
                 }));
-                bl.getObjects().forEach(x=> x.set({
-                    top:x.top + deltaY,
+                tr.getObjects().forEach(x=> x.set({
+                    left:x.left + deltaX,
+                    deltaX:x.deltaX + deltaX?? 0,
                     deltaY:x.deltaY + deltaY?? 0,
                 }));
+                bl.getObjects().forEach(x=> x.set({
+                    top:x.top + deltaY,
+                    deltaX:x.deltaX + deltaX?? 0,
+                    deltaY:x.deltaY + deltaY?? 0,
+                }));
+                tl.getObjects().forEach(x=> x.set({
+                    deltaX:x.deltaX + deltaX?? 0,
+                    deltaY:x.deltaY + deltaY?? 0,
+                }));
+
                 
                 tr.getObjects().forEach(x=> {
                     console.log(x.left,"->left tr top->",x.top)
@@ -258,45 +318,22 @@
             console.log("Frosting")
             let div = document.getElementById("div");
 
-            let bl = createCanvas(div,"bl",100,400,br.toDatalessJSON(['id','deltaX','deltaY']))
-            let tr = createCanvas(div,"tr",400,100,br.toDatalessJSON(['id','deltaX','deltaY']))
-            let tl = createCanvas(div,"tl",100,100,br.toDatalessJSON(['id','deltaX','deltaY']))
-            
-            // let blc = document.createElement("canvas");
-            // let trc = document.createElement("canvas");
-            // let tlc = document.createElement("canvas");
-            // blc.width = 100,
-            // blc.height = 400;
-            // trc.width = 400;
-            // trc.height = 100;
-            // tlc.width = 100;
-            // tlc.height = 100;
-            // blc.setAttribute("id","bl");
-            // trc.setAttribute("id","tr");
-            // tlc.setAttribute("id","tl");
-            // blc.setAttribute("style",`position: absolute; left: 0; top: 0;z-index: 0;border: 1px solid green;`)
-            // trc.setAttribute("style",`position: absolute; left: 0; top: 0;z-index: 0;border: 1px solid blue;`)
-            // tlc.setAttribute("style",`position: absolute; left: 0; top: 0;z-index: 0;border: 1px solid red;`)
-            // div.appendChild(trc);
-            // div.appendChild(blc);
-            // div.appendChild(tlc);
-            // bl = new fabric.Canvas('bl');
-            // tr = new fabric.Canvas('tr');
-            // tl = new fabric.Canvas('tl');
-            // document.getElementsByClassName("canvas-container")[1].setAttribute("style","position:absolute")
-            // document.getElementsByClassName("canvas-container")[2].setAttribute("style","position:absolute")
-            // document.getElementsByClassName("canvas-container")[3].setAttribute("style","position:absolute")
-            // bl.loadFromJSON(JSON.stringify(br.toDatalessJSON(['id','deltaX','deltaY'])),bl.renderAll.bind(bl));
-            // tr.loadFromJSON(JSON.stringify(br.toDatalessJSON(['id','deltaX','deltaY'])),tr.renderAll.bind(tr));
-            // tl.loadFromJSON(JSON.stringify(br.toDatalessJSON(['id','deltaX','deltaY'])),tl.renderAll.bind(tl));
+            let bl = createCanvas(div,"bl",100,400,JSON.stringify(br.toDatalessJSON(['id','deltaX','deltaY'])))
+            let tr = createCanvas(div,"tr",400,100,JSON.stringify(br.toDatalessJSON(['id','deltaX','deltaY'])))
+            let tl = createCanvas(div,"tl",100,100,JSON.stringify(br.toDatalessJSON(['id','deltaX','deltaY'])))
+
             
             for (let i = 0; i < document.getElementsByClassName("canvas-container").length;i++) {
                 document.getElementsByClassName("canvas-container")[i].setAttribute("style","position:absolute")
             };
-            addEvents(tr,[tl,br,bl]);
-            addEvents(tl,[tr,br,bl]);
-            addEvents(br,[tl,tr,bl]);
-            addEvents(bl,[tl,br,tr]);
+            // addEvents(tr,[tl,br,bl]);
+            // addEvents(tl,[tr,br,bl]);
+            // addEvents(br,[br,tl,tr,bl]);
+            // addEvents(bl,[tl,br,tr]);
+            addEvents2(tr,{tl:tl,br:br,bl:bl});
+            addEvents2(tl,{tr:tr,br:br,bl:bl});
+            addEvents2(br,{br:br,tl:tl,tr:tr,bl:bl});
+            addEvents2(bl,{tl:tl,br:br,tr:tr});
             freeze = {};
             freeze.bl = bl;
             freeze.tl = tl;
@@ -333,6 +370,15 @@
         }
     }
 
+    function addEvents2(canvas,toCanvas) {
+        if (!!! canvas) return;
+        for (key of Object.keys(events)) {
+            for (toC of Object.keys(toCanvas)) {
+                if (!!! toC) return;
+                canvas.on(key,events[key](toCanvas[toC],toC));
+            }
+        }
+    }
     function reset(evt) {
         br.getObjects().forEach(x=>{
             console.log(x.deltaX,"<-deltaX br deltaY->",x.deltaY,x.top,"<- top left->",x.left)

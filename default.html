@@ -16,7 +16,7 @@
 
 
     function init() {
-        let id = "canvas"+new Date().getTime();
+        let id = "canvas"+new Date().getTime()+ Math.random()*10;
         let c = document.createElement("canvas");
         c.setAttribute("width",200);
         c.setAttribute("height",200);

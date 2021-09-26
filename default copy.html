@@ -14,24 +14,10 @@
     <script>
         let canvas = init();
         
-        let rect = new fabric.Rect({
-            width: 200,
-            height: 200,
-        });
-        rect.on("moving",(evt) => {
-            console.log(1,evt.e.x);
-        } )
-        rect.on("moving",(evt) => {
-            console.log(2,evt.e.x);
-        } )
-        rect.on("moving",(evt) => {
-            console.log(3,evt.e.x);
-        } )
-        rect.on("moving",(evt) => {
-            console.log(4,evt.e.x);
-        } )
+        let json = ``;
 
-        canvas.add(rect)
+        canvas.loadFromJSON(json);
+       
 
 
         function init() {

@@ -12,6 +12,8 @@
 <script>
    let canvas = init();
    let canvas2 = init();
+   let canvas3 = init();
+   let canvas4 = init();
     
    canvas.add(new fabric.Rect({
        width:50,
@@ -19,13 +21,50 @@
 
    }))
 
-   canvas2.loadFromJSON(canvas.toJSON(),canvas.renderAll.bind(canvas));
-   canvas2.renderAll();
-
-
+   let data = JSON.stringify(canvas.toDatalessJSON(['id','deltaX','deltaY']));
+   canvas2.loadFromJSON(data,canvas2.renderAll.bind(canvas2));
+   canvas3.loadFromJSON(data,canvas3.renderAll.bind(canvas3));
+   canvas4.loadFromJSON(data,canvas4.renderAll.bind(canvas4));
+   let events = {
+        "selection:created" : (canvas,id) => {
+            console.log("event selection:created")
+            return (evt)=>{
+                
+                console.log(id,"selection:created")
+                if (!!!evt.e) return;
+                if (evt.e.x < 100 || evt.e.y < 100) console.log("reset");
+                for (toC of canvas) {
+                    let obj = toC.getObjects().find(x=>x.id === evt.target.id);
+                    toC.setActiveObject(obj);
+                    toC.renderAll();
+                }
+            }
+        },
+    }
+    toEvents(canvas,[canvas2,canvas3,canvas4],"1");
+    toEvents(canvas2,[canvas,canvas3,canvas4],"2");
+    toEvents(canvas3,[canvas2,canvas,canvas4],"3");
+    toEvents(canvas4,[canvas2,canvas3,canvas],"4");
+ 
+function toEvents (canvas, toCanvas,id) {
+    for (key of Object.keys(events)) {
+        canvas.on(key,events[key](toCanvas,id));
+    }
+    
+}
+function addEvents(canvas,toCanvas) {
+        if (!!! canvas) return;
+        for (key of Object.keys(events)) {
+            for (toC of toCanvas) {
+                if (!!! toC) return;
+                canvas.on(key,events[key](toC));
+            }
+        }
+    }
 
     function init() {
-        let id = "canvas"+new Date().getTime();
+
+        let id = "canvas"+new Date().getTime()+ Math.random()*10;
         let c = document.createElement("canvas");
         c.setAttribute("width",200);
         c.setAttribute("height",200);
