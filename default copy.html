@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.min.js"></script>
+    <title>fabric demo </title>
+</head>
+
+<body>
+
+    <script>
+        let canvas = init();
+        
+        let rect = new fabric.Rect({
+            width: 200,
+            height: 200,
+        });
+        rect.on("moving",(evt) => {
+            console.log(1,evt.e.x);
+        } )
+        rect.on("moving",(evt) => {
+            console.log(2,evt.e.x);
+        } )
+        rect.on("moving",(evt) => {
+            console.log(3,evt.e.x);
+        } )
+        rect.on("moving",(evt) => {
+            console.log(4,evt.e.x);
+        } )
+
+        canvas.add(rect)
+
+
+        function init() {
+            let id = "canvas" + new Date().getTime();
+            let c = document.createElement("canvas");
+            c.setAttribute("width", 1200);
+            c.setAttribute("height", 1200);
+            c.setAttribute("id", id);
+            c.style.border = "1px solid black";
+            document.body.appendChild(c);
+            return new fabric.Canvas(id);
+        }
+    </script>
+</body>
+
+</html>

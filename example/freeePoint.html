@@ -9,71 +9,26 @@
     <title>fabric demo </title>
 </head>
 <body>
-    <div style="position: relative;width: 410px;height: 410px;" >
+    <div id="div" style="position: relative;width: 410px;height: 410px;" >
         <canvas id="br" width="400" height="400" 
           style="position: absolute; 
           left: 0; top: 0;
            z-index: 0;border: 1px solid royalblue;"></canvas>
-        <canvas id="tr" width="400" height="100" 
-          style="position: absolute; 
-          left: 0; top: 0; 
-          z-index: 1;border: 1px solid coral;"></canvas>
-       <canvas id="bl" width="100" height="400" 
-          style="position: absolute; 
-          left: 0; top: 0; 
-          z-index: 1;border: 1px solid blueviolet;"></canvas>
-       <canvas id="tl" width="100" height="100" 
-          style="position: absolute; 
-          left: 0; top: 0; 
-          z-index: 1;border: 1px solid aquamarine;"></canvas>
     </div>
     <button id="btn">freeze</button>
     
 <script>
     var br = new fabric.Canvas('br');
-    var bl = new fabric.Canvas('bl');
-    var tr = new fabric.Canvas('tr');
-    var tl = new fabric.Canvas('tl');
+    var tl = null;
+    var tr = null;
+    var bl = null;
     document.getElementsByClassName("canvas-container")[0].setAttribute("style","position:absolute")
-    document.getElementsByClassName("canvas-container")[1].setAttribute("style","position:absolute")
-    document.getElementsByClassName("canvas-container")[2].setAttribute("style","position:absolute")
-    document.getElementsByClassName("canvas-container")[3].setAttribute("style","position:absolute")
-    const imgURL = `https://i.kym-cdn.com/entries/icons/original/000/005/574/takemymoney.jpg`;
-    let freeze = true;
+    const imgURL = `https://th.bing.com/th/id/OIP.28EBZUBR_BR6yOf7Gen8twAAAA?pid=ImgDet&rs=1`;
+    let freeze;
     let btn = document.getElementById("btn");
     
 
-    let rect = new fabric.Rect({
-		deltaX:0,
-		deltaY:0,
-        id:1,
-        width:150,
-        height:150,
-        left: 30,
-        top: 30,
-        fill:"aquamarine",
-    })
 
-    let rect2 = new fabric.Rect({
-		deltaX:0,
-		deltaY:0,
-        id:1,
-        width:150,
-        height:150,
-        left: 30,
-        top: 30,
-        fill:"blueviolet",
-    })
-    let rect3 = new fabric.Rect({
-		deltaX:0,
-		deltaY:0,
-        id:1,
-        width:150,
-        height:150,
-        left: 30,
-        top: 30,
-        fill:"coral",
-    })
     let rect4 = new fabric.Rect({
 		deltaX:0,
 		deltaY:0,
@@ -85,37 +40,7 @@
         fill:"royalblue",
     })
 
-    let recta = new fabric.Rect({
-		deltaX:0,
-		deltaY:0,
-        id:2,
-        width:150,
-        height:150,
-        left: 200,
-        top: 200,
-        fill:"aquamarine",
-    })
 
-    let rect2a = new fabric.Rect({
-		deltaX:0,
-		deltaY:0,
-        id:2,
-        width:150,
-        height:150,
-        left: 200,
-        top: 200,
-        fill:"blueviolet",
-    })
-    let rect3a = new fabric.Rect({
-		deltaX:0,
-		deltaY:0,
-        id:2,
-        width:150,
-        height:150,
-        left: 200,
-        top: 200,
-        fill:"coral",
-    })
     let rect4a = new fabric.Rect({
 		deltaX:0,
 		deltaY:0,
@@ -133,52 +58,14 @@
             left:0,
             top:0,
         })
-        img.scaleToHeight(200);
-        img.scaleToWidth(200);
+      
         br.add(img)
     });
-    new fabric.Image.fromURL(imgURL, img => {
-        img.set({
-            deltaX:0,
-		    deltaY:0,
-            left:0,
-            top:0,
-        })
-        img.scaleToHeight(200);
-        img.scaleToWidth(200);
-        bl.add(img)
-    });
-    new fabric.Image.fromURL(imgURL, img => {
-        img.set({
-            deltaX:0,
-		    deltaY:0,
-            left:0,
-            top:0,
-        })
-        img.scaleToHeight(200);
-        img.scaleToWidth(200);
-        tr.add(img)
-    });
-    new fabric.Image.fromURL(imgURL, img => {
-        img.set({
-            deltaX:0,
-		    deltaY:0,
-            left:0,
-            top:0,
-        })
-        img.scaleToHeight(200);
-        img.scaleToWidth(200);
-        tl.add(img)
-    });
+   
     br.add(rect4);
-    bl.add(rect2);
-    tr.add(rect3);
-    tl.add(rect);
     br.add(rect4a);
-    bl.add(rect2a);
-    tr.add(rect3a);
-    tl.add(recta);
     
+
 
 
     let events = {
@@ -221,7 +108,7 @@
         "selection:created" : (canvas) => {
             return (evt)=>{
                 console.log("selection:created")
-                reset(evt);
+                if (evt.e.x < 100 || evt.e.y < 100) reset(evt);
                 let obj = canvas.getObjects().find(x=>x.id === evt.target.id);
                 canvas.setActiveObject(obj);
             }
@@ -249,6 +136,9 @@
         "mouse:wheel": (canvas) => {
             return (evt)=>{
 
+                let tr = freeze.tr;
+                let tl = freeze.tl;
+                let bl = freeze.bl;
                 console.log("wheel")
                 tl.discardActiveObject();
                 tr.discardActiveObject();
@@ -351,24 +241,86 @@
         },
     }
 
+    function createCanvas(parent,id,width,height,canvasData) {
+        let canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.setAttribute("id",id);
+        canvas.setAttribute("style",`position: absolute; left: 0; top: 0;z-index: 0;border: 1px solid green;`);
+        parent.appendChild(canvas);
+        let c =  new fabric.Canvas(id);
+        c.loadFromJSON(canvasData,c.renderAll.bind(c));
+        return c;
+    }
+
     btn.addEventListener("click",() => {
-        if (freeze) {
+        if (!!!freeze) {
+            console.log("Frosting")
+            let div = document.getElementById("div");
+
+            let bl = createCanvas(div,"bl",100,400,br.toDatalessJSON(['id','deltaX','deltaY']))
+            let tr = createCanvas(div,"tr",400,100,br.toDatalessJSON(['id','deltaX','deltaY']))
+            let tl = createCanvas(div,"tl",100,100,br.toDatalessJSON(['id','deltaX','deltaY']))
+            
+            // let blc = document.createElement("canvas");
+            // let trc = document.createElement("canvas");
+            // let tlc = document.createElement("canvas");
+            // blc.width = 100,
+            // blc.height = 400;
+            // trc.width = 400;
+            // trc.height = 100;
+            // tlc.width = 100;
+            // tlc.height = 100;
+            // blc.setAttribute("id","bl");
+            // trc.setAttribute("id","tr");
+            // tlc.setAttribute("id","tl");
+            // blc.setAttribute("style",`position: absolute; left: 0; top: 0;z-index: 0;border: 1px solid green;`)
+            // trc.setAttribute("style",`position: absolute; left: 0; top: 0;z-index: 0;border: 1px solid blue;`)
+            // tlc.setAttribute("style",`position: absolute; left: 0; top: 0;z-index: 0;border: 1px solid red;`)
+            // div.appendChild(trc);
+            // div.appendChild(blc);
+            // div.appendChild(tlc);
+            // bl = new fabric.Canvas('bl');
+            // tr = new fabric.Canvas('tr');
+            // tl = new fabric.Canvas('tl');
+            // document.getElementsByClassName("canvas-container")[1].setAttribute("style","position:absolute")
+            // document.getElementsByClassName("canvas-container")[2].setAttribute("style","position:absolute")
+            // document.getElementsByClassName("canvas-container")[3].setAttribute("style","position:absolute")
+            // bl.loadFromJSON(JSON.stringify(br.toDatalessJSON(['id','deltaX','deltaY'])),bl.renderAll.bind(bl));
+            // tr.loadFromJSON(JSON.stringify(br.toDatalessJSON(['id','deltaX','deltaY'])),tr.renderAll.bind(tr));
+            // tl.loadFromJSON(JSON.stringify(br.toDatalessJSON(['id','deltaX','deltaY'])),tl.renderAll.bind(tl));
+            
+            for (let i = 0; i < document.getElementsByClassName("canvas-container").length;i++) {
+                document.getElementsByClassName("canvas-container")[i].setAttribute("style","position:absolute")
+            };
+            addEvents(tr,[tl,br,bl]);
+            addEvents(tl,[tr,br,bl]);
+            addEvents(br,[tl,tr,bl]);
+            addEvents(bl,[tl,br,tr]);
+            freeze = {};
+            freeze.bl = bl;
+            freeze.tl = tl;
+            freeze.tr = tr;
+            
+            
+        } else {
+
             console.log("Defrosting")
             reset();
             for (key of Object.keys(events)) {
                 br.off(key)
             }
             
+            let tr = freeze.tr;
+            let tl = freeze.tl;
+            let bl = freeze.bl;
             tr.dispose();
             tl.dispose();
             bl.dispose();
             document.getElementById("tr").remove();
             document.getElementById("tl").remove();
             document.getElementById("bl").remove();
-            freeze = false;
-        } else {
-            console.log("Frosting")
-         
+            freeze = {};
         }
     });
     function addEvents(canvas,toCanvas) {
@@ -395,7 +347,10 @@
             x.dirty = true;
         });
         br.renderAll();
-        if (!freeze) return;
+        if (!!!freeze) return;
+        let tr = freeze.tr;
+        let tl = freeze.tl;
+        let bl = freeze.bl;
         tr.getObjects().forEach(x=>{
             console.log(x.deltaX,"<-deltaX tr deltaY->",x.deltaY,x.top,"<- top left->",x.left)
             x.set({
@@ -430,10 +385,7 @@
 
 
     
-    addEvents(tr,[tl,br,bl]);
-    addEvents(tl,[tr,br,bl]);
-    addEvents(br,[tl,tr,bl]);
-    addEvents(bl,[tl,br,tr]);
+    
 </script>
 </body>
 </html>
