@@ -121,6 +121,16 @@ btn.addEventListener("click",() => {
             left:100,
             top:100
         })
+        bl.clipPath = new fabric.Rect({
+            width:100,
+            height: bl.height - 100,
+            top:100,
+        })
+        tr.clipPath = new fabric.Rect({
+            width:tr.width - 100,
+            height:100,
+            left: 100
+        })
         
         for (let i = 0; i < document.getElementsByClassName("canvas-container").length;i++) {
             document.getElementsByClassName("canvas-container")[i].setAttribute("style","position:absolute")
@@ -133,6 +143,21 @@ btn.addEventListener("click",() => {
         }
 
         // br
+        pubSub.subscribe("reset", (evt)=>{
+            if (evt.e.x > 100 && evt.e.y > 100) return ;
+            let offsetMethod = (x) => {
+                x.set({
+                    left: x.left - x.deltaX?? 0, 
+                    top: x.top - x.deltaY?? 0,
+                    deltaX: 0,
+                    deltaY: 0,
+                })
+                x.setCoords();
+                x.clipPath = null;
+                x.dirty = true;
+            }
+            reset(br,offsetMethod);
+        })
         pubSub.subscribe("object:rotating", (evt)=>{
             let obj = find(br,evt.target.id);
             let moveOffset = {
@@ -171,6 +196,7 @@ btn.addEventListener("click",() => {
             objectMoving(br,obj,moveOffset,null);
         });
         pubSub.subscribe("selection:created", (evt)=>{
+            pubSub.publish("reset",evt)
             selectionCreated(br,evt);
         });
         pubSub.subscribe("selection:cleared", (evt)=>{
@@ -211,6 +237,20 @@ btn.addEventListener("click",() => {
         // br
 
         // tr
+        pubSub.subscribe("reset", (evt)=>{
+            if (evt.e.x > 100 && evt.e.y > 100) return ;
+            let offsetMethod = (x) => {
+                x.set({
+                    left: x.left - x.deltaX?? 0, 
+                    deltaX: 0,
+                    deltaY: 0,
+                })
+                x.setCoords();
+                x.clipPath = null;
+                x.dirty = true;
+            }
+            reset(tr,offsetMethod);
+        })
         pubSub.subscribe("object:rotating", (evt)=>{
             let offsetY = evt.target.deltaY?? 0;  
             let obj = find(tr,evt.target.id);
@@ -251,6 +291,7 @@ btn.addEventListener("click",() => {
             objectMoving(tr,obj,moveOffset,null);
         });
         pubSub.subscribe("selection:created" , (evt)=>{
+            pubSub.publish("reset",evt)
             selectionCreated(tr,evt);
         });
         pubSub.subscribe("selection:cleared", (evt)=>{
@@ -287,6 +328,9 @@ btn.addEventListener("click",() => {
         // tr
 
         // tl
+        pubSub.subscribe("reset", (evt)=>{
+            
+        })
         pubSub.subscribe("object:rotating", (evt)=>{
             let offsetX = evt.target.deltaX ?? 0;
             let offsetY = evt.target.deltaY?? 0; 
@@ -321,6 +365,7 @@ btn.addEventListener("click",() => {
             objectMoving(tl,obj,moveOffset,null);
         });
         pubSub.subscribe("selection:created" , (evt)=>{
+            pubSub.publish("reset",evt)
             selectionCreated(tl,evt);
         });
         pubSub.subscribe("selection:cleared", (evt)=>{
@@ -344,6 +389,20 @@ btn.addEventListener("click",() => {
         // tl
 
         // bl
+        pubSub.subscribe("reset", (evt)=>{
+            if (evt.e.x > 100 && evt.e.y > 100) return ;
+            let offsetMethod = (x) => {
+                x.set({
+                    top: x.top - x.deltaY?? 0,
+                    deltaX: 0,
+                    deltaY: 0,
+                })
+                x.setCoords();
+                x.clipPath = null;
+                x.dirty = true;
+            }
+            reset(bl,offsetMethod);
+        })
         pubSub.subscribe("object:rotating", (evt)=>{
             let offsetX = evt.target.deltaX ?? 0;
             let obj = find(bl,evt.target.id);
@@ -384,6 +443,7 @@ btn.addEventListener("click",() => {
             objectMoving(bl,obj,moveOffset,null);
         });
         pubSub.subscribe("selection:created" , (evt)=>{
+            pubSub.publish("reset",evt)
             selectionCreated(bl,evt);
         });
         pubSub.subscribe("selection:cleared", (evt)=>{
@@ -453,7 +513,7 @@ function selectionCleared(canvas) {
 
 function selectionCreated (canvas,evt) {
     let obj = find(canvas,evt.target.id);
-    canvas.setActiveObject(obj);
+    canvas._setActiveObject(obj);
     canvas.renderAll();
 }
 
@@ -485,7 +545,11 @@ function objectMoving(canvas,obj,moveOffset,imgClipPath) {
 function find(canvas,id) {
     return canvas.getObjects().find(x=>x.id === id);
 }
+function reset(canvas,offsetMethod) {
+    canvas.getObjects().forEach(offsetMethod);
+    canvas.renderAll();
 
+}
 function createCanvas(parent,id,width,height,canvasData) {
     let canvas = document.createElement("canvas");
     canvas.width = width;
