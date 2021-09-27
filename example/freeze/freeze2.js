@@ -18,14 +18,7 @@ class PubSub {
     }
 }
  
-// 创建事件调度中心，为订阅者和发布者提供调度服务
 let pubSub =new PubSub();
-// // A订阅了SMS事件（A只关注SMS本身，而不关心谁发布这个事件）
-// pubSub.subscribe('SMS', console.log);
-// // B订阅了SMS事件
-// pubSub.subscribe('SMS', console.log);
-// // C发布了SMS事件（C只关注SMS本身，不关心谁订阅了这个事件）
-// pubSub.publish('SMS','I published `SMS` event');
 
 let freeze;
 let btn = document.getElementById("btn");
@@ -177,12 +170,6 @@ btn.addEventListener("click",() => {
             left = left < 0 ? 0 : left;
             let top = 100 - evt.target.top;
             top = top < 0 ? 0 : top;
-            let imgClipPath = new fabric.Rect({
-                width: obj.width,
-                height: obj.height,
-                left: -(obj.width / 2) + left/evt.target.scaleX ,
-                top: -(obj.height / 2) + top /evt.target.scaleY,
-            });
             objectMoving(br,obj,moveOffset,null);
         });
         pubSub.subscribe("object:scaling", (evt)=>{
@@ -216,23 +203,8 @@ btn.addEventListener("click",() => {
                     deltaY:x.deltaY + deltaY?? 0,
                 })
             };
-            let ObjectsImgClipPathMethod = (x) => {
-                let left =  100 - x.left;
-                left = left < 0 ? 0 : left;
-
-                let top = 100 - x.top;
-                top = top < 0 ? 0 : top;
-
-                x.clipPath = new fabric.Rect({
-                    width: x.width,
-                    height: x.height,
-                    left: -(x.width / 2) + left/x.scaleX ,
-                    top: -(x.height / 2) + top /x.scaleY,
-                });
-                x.setCoords();
-                x.dirty = true;
-            }
-            mouseWheel(br,ObjectsMoveMethod,ObjectsImgClipPathMethod);
+           
+            mouseWheel(br,ObjectsMoveMethod,null);
         });
         // br
 
@@ -252,7 +224,6 @@ btn.addEventListener("click",() => {
             reset(tr,offsetMethod);
         })
         pubSub.subscribe("object:rotating", (evt)=>{
-            let offsetY = evt.target.deltaY?? 0;  
             let obj = find(tr,evt.target.id);
             let moveOffset = {
                 left: evt.target.left,
@@ -267,17 +238,7 @@ btn.addEventListener("click",() => {
             let moveOffset = {
                 left: evt.target.left,  
                 top: evt.target.top - offsetY, 
-                fill: "green"
             };
-            let left =  100 - evt.target.left;
-            left = left < 0 ? 0 : left;
-            let top = 0;
-            let imgClipPath = new fabric.Rect({
-                width: obj.width,
-                height: obj.height,
-                left: -(obj.width / 2) + left/evt.target.scaleX ,
-                top: -(obj.height / 2) + top /evt.target.scaleY,
-            });
             objectMoving(tr,obj,moveOffset,null);
         });
         pubSub.subscribe("object:scaling", (evt)=>{
@@ -310,20 +271,8 @@ btn.addEventListener("click",() => {
                     deltaY:x.deltaY + deltaY?? 0,
                 })
             };
-            let ObjectsImgClipPathMethod = (x) => {
-                let left =  100 - x.left;
-                left = left < 0 ? 0 : left;
-
-                x.clipPath = new fabric.Rect({
-                    width: x.width,
-                    height: x.height,
-                    left: -(x.width / 2) + left/x.scaleX ,
-                    top: -(x.height / 2) ,
-                });
-                x.dirty = true;
-                x.setCoords();
-            }
-            mouseWheel(tr,ObjectsMoveMethod,ObjectsImgClipPathMethod);
+            
+            mouseWheel(tr,ObjectsMoveMethod,null);
         });
         // tr
 
@@ -332,8 +281,6 @@ btn.addEventListener("click",() => {
             
         })
         pubSub.subscribe("object:rotating", (evt)=>{
-            let offsetX = evt.target.deltaX ?? 0;
-            let offsetY = evt.target.deltaY?? 0; 
             let obj = find(tl,evt.target.id);
             let moveOffset = {
                 left: evt.target.left ,  
@@ -351,8 +298,7 @@ btn.addEventListener("click",() => {
                 top: evt.target.top - offsetY, 
                 fill :"orange"
             };
-            let imgClipPath = null
-            objectMoving(tl,obj,moveOffset,imgClipPath);
+            objectMoving(tl,obj,moveOffset,null);
         });
         pubSub.subscribe("object:scaling", (evt)=>{
             let obj = find(tl,evt.target.id);
@@ -383,8 +329,7 @@ btn.addEventListener("click",() => {
                     deltaY:x.deltaY + deltaY?? 0,
                 })
             };
-            let ObjectsImgClipPathMethod = (x) => {}
-            mouseWheel(tl,ObjectsMoveMethod,ObjectsImgClipPathMethod);
+            mouseWheel(tl,ObjectsMoveMethod,null);
         });
         // tl
 
@@ -404,7 +349,6 @@ btn.addEventListener("click",() => {
             reset(bl,offsetMethod);
         })
         pubSub.subscribe("object:rotating", (evt)=>{
-            let offsetX = evt.target.deltaX ?? 0;
             let obj = find(bl,evt.target.id);
             let moveOffset = {
                 left: evt.target.left ,  
@@ -421,15 +365,6 @@ btn.addEventListener("click",() => {
                 top: evt.target.top, 
                 fill : "red"
             };
-            let left = 0
-            let top = 100 - evt.target.top;
-            top = top < 0 ? 0 : top;
-            let imgClipPath = new fabric.Rect({
-                width: obj.width,
-                height: obj.height,
-                left: -(obj.width / 2) + left/evt.target.scaleX ,
-                top: -(obj.height / 2) + top /evt.target.scaleY,
-            });
             objectMoving(bl,obj,moveOffset,null);
         });
         pubSub.subscribe("object:scaling", (evt)=>{
@@ -462,20 +397,7 @@ btn.addEventListener("click",() => {
                     deltaY:x.deltaY + deltaY?? 0,
                 })
             };
-            let ObjectsImgClipPathMethod = (x) => {
-                let top = 100 - x.top;
-                top = top < 0 ? 0 : top;
-
-                x.clipPath = new fabric.Rect({
-                    width: x.width,
-                    height: x.height,
-                    left: -(x.width / 2),
-                    top: -(x.height / 2) + top/x.scaleY ,
-                });
-                x.setCoords();
-                x.dirty = true;
-            }
-            mouseWheel(bl,ObjectsMoveMethod,ObjectsImgClipPathMethod);
+            mouseWheel(bl,ObjectsMoveMethod,null);
         });
         // bl
 
@@ -528,7 +450,6 @@ function selectionUpdated(canvas,evt) {
 function mouseWheel(canvas,ObjectsMoveMethod,ObjectsImgClipPathMethod) {
     canvas.discardActiveObject();
     canvas.getObjects().forEach(ObjectsMoveMethod);
-    // canvas.getObjects().forEach(ObjectsImgClipPathMethod);
     canvas.renderAll();
 }
 
