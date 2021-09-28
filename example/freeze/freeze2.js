@@ -73,7 +73,6 @@ let events = {
     "object:moving":(evt)=>{
         console.log("object:moving")
         pubSub.publish("object:moving",evt);
-   
     },
     "object:scaling":(evt)=>{
         console.log("object:scaling")
@@ -108,298 +107,24 @@ btn.addEventListener("click",() => {
         let tr = createCanvas(div,"tr",400,100,JSON.stringify(br.toDatalessJSON(['id','deltaX','deltaY'])))
         let tl = createCanvas(div,"tl",100,100,JSON.stringify(br.toDatalessJSON(['id','deltaX','deltaY'])))
 
-        br.clipPath = new fabric.Rect({
-            width:br.width - 100,
-            height:br.height - 100,
-            left:100,
-            top:100
-        })
-        bl.clipPath = new fabric.Rect({
-            width:100,
-            height: bl.height - 100,
-            top:100,
-        })
-        tr.clipPath = new fabric.Rect({
-            width:tr.width - 100,
-            height:100,
-            left: 100
-        })
         
         for (let i = 0; i < document.getElementsByClassName("canvas-container").length;i++) {
             document.getElementsByClassName("canvas-container")[i].setAttribute("style","position:absolute")
         };
+        
         for (key of Object.keys(events)) {
             br.on(key, events[key]);
             tr.on(key, events[key]);
             bl.on(key, events[key]);
             tl.on(key, events[key]);
         }
+        initBr(br);
 
-        // br
-        pubSub.subscribe("reset", (evt)=>{
-            if (evt.e.x > 100 && evt.e.y > 100) return ;
-            let offsetMethod = (x) => {
-                x.set({
-                    left: x.left - x.deltaX?? 0, 
-                    top: x.top - x.deltaY?? 0,
-                    deltaX: 0,
-                    deltaY: 0,
-                })
-                x.setCoords();
-                x.clipPath = null;
-                x.dirty = true;
-            }
-            reset(br,offsetMethod);
-        })
-        pubSub.subscribe("object:rotating", (evt)=>{
-            let obj = find(br,evt.target.id);
-            let moveOffset = {
-                left: evt.target.left,
-                top: evt.target.top,
-                angle: evt.target.angle,
-            };
-            objectMoving(br,obj,moveOffset,null);
-        });
-        pubSub.subscribe("object:moving", (evt)=>{
-            let obj = find(br,evt.target.id);
-            let moveOffset = {
-                left: evt.target.left,
-                top: evt.target.top,
-            };
-            let left =  100 - evt.target.left;
-            left = left < 0 ? 0 : left;
-            let top = 100 - evt.target.top;
-            top = top < 0 ? 0 : top;
-            objectMoving(br,obj,moveOffset,null);
-        });
-        pubSub.subscribe("object:scaling", (evt)=>{
-            let obj = find(br,evt.target.id);
-            let moveOffset = {
-                left: evt.target.left,
-                top: evt.target.top,
-                scaleX: evt.target.scaleX,
-                scaleY: evt.target.scaleY,
-            };
-            objectMoving(br,obj,moveOffset,null);
-        });
-        pubSub.subscribe("selection:created", (evt)=>{
-            pubSub.publish("reset",evt)
-            selectionCreated(br,evt);
-        });
-        pubSub.subscribe("selection:cleared", (evt)=>{
-            selectionCleared(br);
-        });
-        pubSub.subscribe("selection:updated", (evt)=>{
-            selectionUpdated(br,evt);
-        });
-        pubSub.subscribe("mouse:wheel", (evt)=>{
-            let deltaX = evt.e.deltaX/10;
-            let deltaY = evt.e.deltaY/10;
-            let ObjectsMoveMethod = (x)=>{
-                x.set({
-                    left:x.left + deltaX,
-                    deltaX:x.deltaX + deltaX?? 0,
-                    top:x.top + deltaY,
-                    deltaY:x.deltaY + deltaY?? 0,
-                })
-            };
-           
-            mouseWheel(br,ObjectsMoveMethod,null);
-        });
-        // br
+        initTr(tr);
 
-        // tr
-        pubSub.subscribe("reset", (evt)=>{
-            if (evt.e.x > 100 && evt.e.y > 100) return ;
-            let offsetMethod = (x) => {
-                x.set({
-                    left: x.left - x.deltaX?? 0, 
-                    deltaX: 0,
-                    deltaY: 0,
-                })
-                x.setCoords();
-                x.clipPath = null;
-                x.dirty = true;
-            }
-            reset(tr,offsetMethod);
-        })
-        pubSub.subscribe("object:rotating", (evt)=>{
-            let obj = find(tr,evt.target.id);
-            let moveOffset = {
-                left: evt.target.left,
-                top: evt.target.top ,
-                angle: evt.target.angle,
-            };
-            objectMoving(tr,obj,moveOffset,null);
-        });
-        pubSub.subscribe("object:moving", (evt)=>{
-            let obj = find(tr,evt.target.id);
-            let offsetY = evt.target.deltaY?? 0;  
-            let moveOffset = {
-                left: evt.target.left,  
-                top: evt.target.top - offsetY, 
-            };
-            objectMoving(tr,obj,moveOffset,null);
-        });
-        pubSub.subscribe("object:scaling", (evt)=>{
-            let obj = find(tr,evt.target.id);
-            let moveOffset = {
-                left: evt.target.left,
-                top: evt.target.top,
-                scaleX: evt.target.scaleX,
-                scaleY: evt.target.scaleY,
-            };
-            objectMoving(tr,obj,moveOffset,null);
-        });
-        pubSub.subscribe("selection:created" , (evt)=>{
-            pubSub.publish("reset",evt)
-            selectionCreated(tr,evt);
-        });
-        pubSub.subscribe("selection:cleared", (evt)=>{
-            selectionCleared(tr);
-        });
-        pubSub.subscribe("selection:updated", (evt)=>{
-            selectionUpdated(tr,evt);
-        });
-        pubSub.subscribe("mouse:wheel", (evt)=>{
-            let deltaX = evt.e.deltaX/10;
-            let deltaY = evt.e.deltaY/10;
-            let ObjectsMoveMethod = (x)=>{
-                x.set({
-                    left:x.left + deltaX,
-                    deltaX:x.deltaX + deltaX?? 0,
-                    deltaY:x.deltaY + deltaY?? 0,
-                })
-            };
-            
-            mouseWheel(tr,ObjectsMoveMethod,null);
-        });
-        // tr
+        initTl(tl);
 
-        // tl
-        pubSub.subscribe("reset", (evt)=>{
-            
-        })
-        pubSub.subscribe("object:rotating", (evt)=>{
-            let obj = find(tl,evt.target.id);
-            let moveOffset = {
-                left: evt.target.left ,  
-                top: evt.target.top , 
-                angle: evt.target.angle,
-            };
-            objectMoving(tl,obj,moveOffset,null);
-        });
-        pubSub.subscribe("object:moving", (evt)=>{
-            let obj = find(tl,evt.target.id);
-            let offsetX = evt.target.deltaX ?? 0;
-            let offsetY = evt.target.deltaY?? 0;  
-            let moveOffset = {
-                left: evt.target.left - offsetX,  
-                top: evt.target.top - offsetY, 
-                fill :"orange"
-            };
-            objectMoving(tl,obj,moveOffset,null);
-        });
-        pubSub.subscribe("object:scaling", (evt)=>{
-            let obj = find(tl,evt.target.id);
-            let moveOffset = {
-                left: evt.target.left,
-                top: evt.target.top,
-                scaleX: evt.target.scaleX,
-                scaleY: evt.target.scaleY,
-            };
-            objectMoving(tl,obj,moveOffset,null);
-        });
-        pubSub.subscribe("selection:created" , (evt)=>{
-            pubSub.publish("reset",evt)
-            selectionCreated(tl,evt);
-        });
-        pubSub.subscribe("selection:cleared", (evt)=>{
-            selectionCleared(tl);
-        });
-        pubSub.subscribe("selection:updated", (evt)=>{
-            selectionUpdated(tl,evt);
-        });
-        pubSub.subscribe("mouse:wheel", (evt)=>{
-            let deltaX = evt.e.deltaX/10;
-            let deltaY = evt.e.deltaY/10;
-            let ObjectsMoveMethod = (x)=>{
-                x.set({
-                    deltaX:x.deltaX + deltaX?? 0,
-                    deltaY:x.deltaY + deltaY?? 0,
-                })
-            };
-            mouseWheel(tl,ObjectsMoveMethod,null);
-        });
-        // tl
-
-        // bl
-        pubSub.subscribe("reset", (evt)=>{
-            if (evt.e.x > 100 && evt.e.y > 100) return ;
-            let offsetMethod = (x) => {
-                x.set({
-                    top: x.top - x.deltaY?? 0,
-                    deltaX: 0,
-                    deltaY: 0,
-                })
-                x.setCoords();
-                x.clipPath = null;
-                x.dirty = true;
-            }
-            reset(bl,offsetMethod);
-        })
-        pubSub.subscribe("object:rotating", (evt)=>{
-            let obj = find(bl,evt.target.id);
-            let moveOffset = {
-                left: evt.target.left ,  
-                top: evt.target.top, 
-                angle: evt.target.angle,
-            };
-            objectMoving(bl,obj,moveOffset,null);
-        });
-        pubSub.subscribe("object:moving", (evt)=>{
-            let obj = find(bl,evt.target.id);
-            let offsetX = evt.target.deltaX ?? 0;
-            let moveOffset = {
-                left: evt.target.left - offsetX,  
-                top: evt.target.top, 
-                fill : "red"
-            };
-            objectMoving(bl,obj,moveOffset,null);
-        });
-        pubSub.subscribe("object:scaling", (evt)=>{
-            let obj = find(bl,evt.target.id);
-            let moveOffset = {
-                left: evt.target.left,
-                top: evt.target.top,
-                scaleX: evt.target.scaleX,
-                scaleY: evt.target.scaleY,
-            };
-            objectMoving(bl,obj,moveOffset,null);
-        });
-        pubSub.subscribe("selection:created" , (evt)=>{
-            pubSub.publish("reset",evt)
-            selectionCreated(bl,evt);
-        });
-        pubSub.subscribe("selection:cleared", (evt)=>{
-            selectionCleared(bl);
-        });
-        pubSub.subscribe("selection:updated", (evt)=>{
-            selectionUpdated(bl,evt);
-        });
-        pubSub.subscribe("mouse:wheel", (evt)=>{
-            let deltaX = evt.e.deltaX/10;
-            let deltaY = evt.e.deltaY/10;
-            let ObjectsMoveMethod = (x)=>{
-                x.set({
-                    top:x.top + deltaY,
-                    deltaX:x.deltaX + deltaX?? 0,
-                    deltaY:x.deltaY + deltaY?? 0,
-                })
-            };
-            mouseWheel(bl,ObjectsMoveMethod,null);
-        });
-        // bl
+        initBl(bl);
 
         freeze = {};
         freeze.bl = bl;
@@ -410,7 +135,7 @@ btn.addEventListener("click",() => {
     } else {
 
         console.log("Defrosting")
-        reset();
+        updateObjects();
         for (key of Object.keys(events)) {
             br.off(key)
         }
@@ -427,6 +152,290 @@ btn.addEventListener("click",() => {
         freeze = undefined;
     }
 });
+
+function initBl(bl) {
+    bl.clipPath = new fabric.Rect({
+        width:100,
+        height: bl.height - 100,
+        top:100,
+    })
+    pubSub.subscribe("reset", (evt) => {
+        if (evt.e.x > 100 && evt.e.y > 100)
+            return;
+        let offsetMethod = (x) => {
+            x.set({
+                top: x.top - x.deltaY ?? 0,
+                deltaX: 0,
+                deltaY: 0,
+            });
+            x.setCoords();
+            x.clipPath = null;
+            x.dirty = true;
+        };
+        updateObjects(bl, offsetMethod);
+    });
+    pubSub.subscribe("object:rotating", (evt) => {
+        let obj = find(bl, evt.target.id);
+        let moveOffset = {
+            left: evt.target.left,
+            top: evt.target.top,
+            angle: evt.target.angle,
+        };
+        objectMoving(bl, obj, moveOffset, null);
+    });
+    pubSub.subscribe("object:moving", (evt) => {
+        let obj = find(bl, evt.target.id);
+        let offsetX = evt.target.deltaX ?? 0;
+        let moveOffset = {
+            left: evt.target.left - offsetX,
+            top: evt.target.top,
+            fill: "red"
+        };
+        objectMoving(bl, obj, moveOffset, null);
+    });
+    pubSub.subscribe("object:scaling", (evt) => {
+        let obj = find(bl, evt.target.id);
+        let moveOffset = {
+            left: evt.target.left,
+            top: evt.target.top,
+            scaleX: evt.target.scaleX,
+            scaleY: evt.target.scaleY,
+        };
+        objectMoving(bl, obj, moveOffset, null);
+    });
+    pubSub.subscribe("selection:created", (evt) => {
+        pubSub.publish("reset", evt);
+        selectionCreated(bl, evt);
+    });
+    pubSub.subscribe("selection:cleared", (evt) => {
+        selectionCleared(bl);
+    });
+    pubSub.subscribe("selection:updated", (evt) => {
+        selectionUpdated(bl, evt);
+    });
+    pubSub.subscribe("mouse:wheel", (evt) => {
+        let deltaX = evt.e.deltaX / 10;
+        let deltaY = evt.e.deltaY / 10;
+        let ObjectsMoveMethod = (x) => {
+            x.set({
+                top: x.top + deltaY,
+                deltaX: x.deltaX + deltaX ?? 0,
+                deltaY: x.deltaY + deltaY ?? 0,
+            });
+        };
+        mouseWheel(bl, ObjectsMoveMethod, null);
+    });
+}
+
+function initTl(tl) {
+    pubSub.subscribe("reset", (evt) => {
+    });
+    pubSub.subscribe("object:rotating", (evt) => {
+        let obj = find(tl, evt.target.id);
+        let moveOffset = {
+            left: evt.target.left,
+            top: evt.target.top,
+            angle: evt.target.angle,
+        };
+        objectMoving(tl, obj, moveOffset, null);
+    });
+    pubSub.subscribe("object:moving", (evt) => {
+        let obj = find(tl, evt.target.id);
+        let offsetX = evt.target.deltaX ?? 0;
+        let offsetY = evt.target.deltaY ?? 0;
+        let moveOffset = {
+            left: evt.target.left - offsetX,
+            top: evt.target.top - offsetY,
+            fill: "orange"
+        };
+        objectMoving(tl, obj, moveOffset, null);
+    });
+    pubSub.subscribe("object:scaling", (evt) => {
+        let obj = find(tl, evt.target.id);
+        let moveOffset = {
+            left: evt.target.left,
+            top: evt.target.top,
+            scaleX: evt.target.scaleX,
+            scaleY: evt.target.scaleY,
+        };
+        objectMoving(tl, obj, moveOffset, null);
+    });
+    pubSub.subscribe("selection:created", (evt) => {
+        pubSub.publish("reset", evt);
+        selectionCreated(tl, evt);
+    });
+    pubSub.subscribe("selection:cleared", (evt) => {
+        selectionCleared(tl);
+    });
+    pubSub.subscribe("selection:updated", (evt) => {
+        selectionUpdated(tl, evt);
+    });
+    pubSub.subscribe("mouse:wheel", (evt) => {
+        let deltaX = evt.e.deltaX / 10;
+        let deltaY = evt.e.deltaY / 10;
+        let ObjectsMoveMethod = (x) => {
+            x.set({
+                deltaX: x.deltaX + deltaX ?? 0,
+                deltaY: x.deltaY + deltaY ?? 0,
+            });
+        };
+        mouseWheel(tl, ObjectsMoveMethod, null);
+    });
+}
+
+function initTr(tr) {
+    tr.clipPath = new fabric.Rect({
+        width:tr.width - 100,
+        height:100,
+        left: 100
+    })
+    pubSub.subscribe("reset", (evt) => {
+        if (evt.e.x > 100 && evt.e.y > 100)
+            return;
+        let offsetMethod = (x) => {
+            x.set({
+                left: x.left - x.deltaX ?? 0,
+                deltaX: 0,
+                deltaY: 0,
+            });
+            x.setCoords();
+            x.clipPath = null;
+            x.dirty = true;
+        };
+        updateObjects(tr, offsetMethod);
+    });
+    pubSub.subscribe("object:rotating", (evt) => {
+        let obj = find(tr, evt.target.id);
+        let moveOffset = {
+            left: evt.target.left,
+            top: evt.target.top,
+            angle: evt.target.angle,
+        };
+        objectMoving(tr, obj, moveOffset, null);
+    });
+    pubSub.subscribe("object:moving", (evt) => {
+        let obj = find(tr, evt.target.id);
+        let offsetY = evt.target.deltaY ?? 0;
+        let moveOffset = {
+            left: evt.target.left,
+            top: evt.target.top - offsetY,
+        };
+        objectMoving(tr, obj, moveOffset, null);
+    });
+    pubSub.subscribe("object:scaling", (evt) => {
+        let obj = find(tr, evt.target.id);
+        let moveOffset = {
+            left: evt.target.left,
+            top: evt.target.top,
+            scaleX: evt.target.scaleX,
+            scaleY: evt.target.scaleY,
+        };
+        objectMoving(tr, obj, moveOffset, null);
+    });
+    pubSub.subscribe("selection:created", (evt) => {
+        pubSub.publish("reset", evt);
+        selectionCreated(tr, evt);
+    });
+    pubSub.subscribe("selection:cleared", (evt) => {
+        selectionCleared(tr);
+    });
+    pubSub.subscribe("selection:updated", (evt) => {
+        selectionUpdated(tr, evt);
+    });
+    pubSub.subscribe("mouse:wheel", (evt) => {
+        let deltaX = evt.e.deltaX / 10;
+        let deltaY = evt.e.deltaY / 10;
+        let ObjectsMoveMethod = (x) => {
+            x.set({
+                left: x.left + deltaX,
+                deltaX: x.deltaX + deltaX ?? 0,
+                deltaY: x.deltaY + deltaY ?? 0,
+            });
+        };
+
+        mouseWheel(tr, ObjectsMoveMethod, null);
+    });
+}
+
+function initBr(br) {
+    br.clipPath = new fabric.Rect({
+        width:br.width - 100,
+        height:br.height - 100,
+        left:100,
+        top:100
+    })
+    pubSub.subscribe("reset", (evt) => {
+        if (evt.e.x > 100 && evt.e.y > 100)
+            return;
+        let offsetMethod = (x) => {
+            x.set({
+                left: x.left - x.deltaX ?? 0,
+                top: x.top - x.deltaY ?? 0,
+                deltaX: 0,
+                deltaY: 0,
+            });
+            x.setCoords();
+            x.clipPath = null;
+            x.dirty = true;
+        };
+        updateObjects(br, offsetMethod);
+    });
+    pubSub.subscribe("object:rotating", (evt) => {
+        let obj = find(br, evt.target.id);
+        let moveOffset = {
+            left: evt.target.left,
+            top: evt.target.top,
+            angle: evt.target.angle,
+        };
+        objectMoving(br, obj, moveOffset, null);
+    });
+    pubSub.subscribe("object:moving", (evt) => {
+        let obj = find(br, evt.target.id);
+        let moveOffset = {
+            left: evt.target.left,
+            top: evt.target.top,
+        };
+        let left = 100 - evt.target.left;
+        left = left < 0 ? 0 : left;
+        let top = 100 - evt.target.top;
+        top = top < 0 ? 0 : top;
+        objectMoving(br, obj, moveOffset, null);
+    });
+    pubSub.subscribe("object:scaling", (evt) => {
+        let obj = find(br, evt.target.id);
+        let moveOffset = {
+            left: evt.target.left,
+            top: evt.target.top,
+            scaleX: evt.target.scaleX,
+            scaleY: evt.target.scaleY,
+        };
+        objectMoving(br, obj, moveOffset, null);
+    });
+    pubSub.subscribe("selection:created", (evt) => {
+        pubSub.publish("reset", evt);
+        selectionCreated(br, evt);
+    });
+    pubSub.subscribe("selection:cleared", (evt) => {
+        selectionCleared(br);
+    });
+    pubSub.subscribe("selection:updated", (evt) => {
+        selectionUpdated(br, evt);
+    });
+    pubSub.subscribe("mouse:wheel", (evt) => {
+        let deltaX = evt.e.deltaX / 10;
+        let deltaY = evt.e.deltaY / 10;
+        let ObjectsMoveMethod = (x) => {
+            x.set({
+                left: x.left + deltaX,
+                deltaX: x.deltaX + deltaX ?? 0,
+                top: x.top + deltaY,
+                deltaY: x.deltaY + deltaY ?? 0,
+            });
+        };
+
+        mouseWheel(br, ObjectsMoveMethod, null);
+    });
+}
 
 function selectionCleared(canvas) {
     canvas.discardActiveObject();
@@ -447,16 +456,13 @@ function selectionUpdated(canvas,evt) {
     canvas.setActiveObject(obj);
     canvas.renderAll();
 }
-function mouseWheel(canvas,ObjectsMoveMethod,ObjectsImgClipPathMethod) {
+function mouseWheel(canvas,offsetMethod) {
     canvas.discardActiveObject();
-    canvas.getObjects().forEach(ObjectsMoveMethod);
-    canvas.renderAll();
+    updateObjects(canvas,offsetMethod)
 }
 
-// todo  移动后重新选择
-// todo 角度移动后 clippath切割的角度没变
+
 function objectMoving(canvas,obj,moveOffset,imgClipPath) {
-    // obj.hasControls = obj.hasBorders = false;
     obj.set(moveOffset);
     obj.clipPath = imgClipPath;
     obj.dirty = true;
@@ -466,7 +472,7 @@ function objectMoving(canvas,obj,moveOffset,imgClipPath) {
 function find(canvas,id) {
     return canvas.getObjects().find(x=>x.id === id);
 }
-function reset(canvas,offsetMethod) {
+function updateObjects(canvas,offsetMethod) {
     canvas.getObjects().forEach(offsetMethod);
     canvas.renderAll();
 
